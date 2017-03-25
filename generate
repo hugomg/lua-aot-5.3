@@ -2,7 +2,7 @@
 set -eu
 
 LUASRC="./src"
-CFLAGS="-Wall -Wextra -std=c99 -pedantic -fPIC -shared -O2 -Wno-unused-label -I${LUASRC}"
+CFLAGS="-Wall -Wextra -std=c99 -pedantic -fPIC -shared -O2 -Wno-unused-label -g -I${LUASRC}"
 
 #-------------------
 
