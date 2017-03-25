@@ -8,7 +8,6 @@ local function fac(n)
 end
 
 if magic then
-  print("magic exists!")
   magic(1, fac)
 end
 

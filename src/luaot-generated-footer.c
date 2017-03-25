@@ -5,6 +5,13 @@ static int magic(lua_State *L) {
     
     luaL_checktype(L, 1, LUA_TNUMBER);
     luaL_checktype(L, 2, LUA_TFUNCTION);
+    if (lua_tocfunction(L, 2) != NULL) {
+        lua_pop(L, 2);
+        lua_pushliteral(L, "not a Lua closure");
+        lua_error(L);
+        return 0; /* never reached */
+    }
+    
 
     lua_Integer ix = lua_tointeger(L, 1);
     if (!(1 <= ix && ix <= NFUNCTIONS)) {
@@ -14,15 +21,7 @@ static int magic(lua_State *L) {
         return 0; /* never reached */
     }
     
-    StkId o = (void *) lua_topointer(L, 2);
-    if (ttype(o) != LUA_TLCL) {
-        lua_pop(L, 2);
-        lua_pushliteral(L, "not a Lua closure");
-        lua_error(L);
-        return 0; /* never reached */
-    }
-    
-    LClosure *cl = (LClosure *) o;
+    LClosure *cl = (void *) lua_topointer(L, 2);
     cl->p->magic_implementation = zz_magic_functions[ix-1];
 
     return 0;
