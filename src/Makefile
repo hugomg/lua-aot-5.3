@@ -42,8 +42,11 @@ LUA_O=	lua.o
 LUAC_T=	luac
 LUAC_O=	luac.o
 
-ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O)
-ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T)
+LUAOT_T= luaot
+LUAOT_O= luaot.o
+
+ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O) $(LUAOT_O)
+ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(LUAOT_T)
 ALL_A= $(LUA_A)
 
 # Targets start here.
@@ -64,6 +67,9 @@ $(LUA_T): $(LUA_O) $(LUA_A)
 
 $(LUAC_T): $(LUAC_O) $(LUA_A)
 	$(CC) -o $@ $(LDFLAGS) $(LUAC_O) $(LUA_A) $(LIBS)
+
+$(LUAOT_T): $(LUAOT_O) $(LUA_A)
+	$(CC) -o $@ $(LDFLAGS) $(LUAOT_O) $(LUA_A) $(LIBS)
 
 clean:
 	$(RM) $(ALL_T) $(ALL_O)
@@ -193,5 +199,8 @@ lvm.o: lvm.c lprefix.h lua.h luaconf.h ldebug.h lstate.h lobject.h \
  ltable.h lvm.h
 lzio.o: lzio.c lprefix.h lua.h luaconf.h llimits.h lmem.h lstate.h \
  lobject.h ltm.h lzio.h
+
+luaot.o: luaot.c lprefix.h lua.h luaconf.h lauxlib.h lobject.h llimits.h \
+ lstate.h ltm.h lzio.h lmem.h lundump.h ldebug.h lopcodes.h
 
 # (end of Makefile)

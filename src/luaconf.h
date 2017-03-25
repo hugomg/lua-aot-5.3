@@ -275,12 +275,14 @@
 ** give a warning about it. To avoid these warnings, change to the
 ** default definition.
 */
-#if defined(__GNUC__) && ((__GNUC__*100 + __GNUC_MINOR__) >= 302) && \
-    defined(__ELF__)		/* { */
-#define LUAI_FUNC	__attribute__((visibility("hidden"))) extern
-#else				/* }{ */
+/*  ACTUALLY: make everything public because we need to expose
+ *  internal APIs for the AOT compiler to work... **/
+/*#if defined(__GNUC__) && ((__GNUC__*100 + __GNUC_MINOR__) >= 302) && \
+    defined(__ELF__) */	/* { */
+/*#define LUAI_FUNC	__attribute__((visibility("hidden"))) extern*/
+/*#else*/				/* }{ */
 #define LUAI_FUNC	extern
-#endif				/* } */
+/*#endif*/				/* } */
 
 #define LUAI_DDEC	LUAI_FUNC
 #define LUAI_DDEF	/* empty */

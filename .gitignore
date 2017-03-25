@@ -1,4 +1,10 @@
 *.o
 *.a
+
 src/lua
 src/luac
+src/luaot
+
+generated/*.c
+generated/*.so
+

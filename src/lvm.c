@@ -797,7 +797,7 @@ void luaV_execute (lua_State *L) {
 
   /* AOT compiler hook (todo: consider changing to precall */
   if (cl->p->magic_implementation) {
-    printf("thrusters activated\n");
+    //printf("thrusters activated\n");
     int fresh = cl->p->magic_implementation(&L, &ci, &cl, &k, &base);
     if (fresh) {
       return;
