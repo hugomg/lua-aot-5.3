@@ -400,6 +400,12 @@ typedef struct LocVar {
   int endpc;    /* first point where variable is dead */
 } LocVar;
 
+/*
+** For the AOT compilation hack
+** The parameter types are unspecified because they use internal types that
+** are not visible in this file.
+*/
+typedef int (*ZZ_MAGIC_FUNC) (/* ARGS */);
 
 /*
 ** Function Prototypes
@@ -426,6 +432,8 @@ typedef struct Proto {
   struct LClosure *cache;  /* last-created closure with this prototype */
   TString  *source;  /* used for debug information */
   GCObject *gclist;
+
+  ZZ_MAGIC_FUNC magic_implementation; /* For magic AOT compilation */
 } Proto;
 
 

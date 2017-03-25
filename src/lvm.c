@@ -132,7 +132,7 @@ int luaV_tointeger (const TValue *obj, lua_Integer *p, int mode) {
 ** the extreme case when the initial value is LUA_MININTEGER, in which
 ** case the LUA_MININTEGER limit would still run the loop once.
 */
-static int forlimit (const TValue *obj, lua_Integer *p, lua_Integer step,
+int luaV_forlimit (const TValue *obj, lua_Integer *p, lua_Integer step,
                      int *stopnow) {
   *stopnow = 0;  /* usually, let loops run */
   if (!luaV_tointeger(obj, p, (step < 0 ? 2 : 1))) {  /* not fit in integer? */
@@ -794,6 +794,18 @@ void luaV_execute (lua_State *L) {
   cl = clLvalue(ci->func);  /* local reference to function's closure */
   k = cl->p->k;  /* local reference to function's constant table */
   base = ci->u.l.base;  /* local copy of function's base */
+
+  /* AOT compiler hook (todo: consider changing to precall */
+  if (cl->p->magic_implementation) {
+    printf("thrusters activated\n");
+    int fresh = cl->p->magic_implementation(&L, &ci, &cl, &k, &base);
+    if (fresh) {
+      return;
+    } else {
+      goto newframe;
+    }
+  }
+
   /* main loop of interpreter */
   for (;;) {
     Instruction i;
@@ -1218,7 +1230,7 @@ void luaV_execute (lua_State *L) {
         lua_Integer ilimit;
         int stopnow;
         if (ttisinteger(init) && ttisinteger(pstep) &&
-            forlimit(plimit, &ilimit, ivalue(pstep), &stopnow)) {
+            luaV_forlimit(plimit, &ilimit, ivalue(pstep), &stopnow)) {
           /* all values are integer */
           lua_Integer initv = (stopnow ? 0 : ivalue(init));
           setivalue(plimit, ilimit);
