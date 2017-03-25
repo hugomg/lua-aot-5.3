@@ -395,19 +395,11 @@ static void PrintCode(const Proto* f)
   printf("// lastlinedefined = %d\n", f->lastlinedefined);
   printf("// what = %s\n", (f->linedefined == 0) ? "main" : "Lua");
 
-  printf("static int zz_magic_function_%d (\n", nfunctions++);
-  printf("  lua_State **L_p,\n");
-  printf("  CallInfo  **ci_p,\n");
-  printf("  LClosure  **cl_p,\n");
-  printf("  TValue    **k_p,\n");
-  printf("  StkId      *base_p\n"); 
-  printf("){\n");
-  printf("  int return_value;\n");
-  printf("  lua_State *L   = *L_p;\n");
-  printf("  CallInfo  *ci  = *ci_p;\n");
-  printf("  LClosure  *cl  = *cl_p;\n");
-  printf("  TValue    *k   = *k_p;\n");
-  printf("  StkId     base = *base_p;\n");
+  printf("static int zz_magic_function_%d (lua_State *L, LClosure *cl)\n", nfunctions++);
+  printf("{\n");
+  printf("  CallInfo *ci = L->ci;\n");
+  printf("  TValue *k = cl->p->k;\n");
+  printf("  StkId base = ci->u.l.base;\n");
   printf("  \n");
  
   for (pc=0; pc<n; pc++)
@@ -670,22 +662,22 @@ static void PrintCode(const Proto* f)
         printf("    }\n");
       } break;
 
-      // case OP_CALL: {
-      //   printf("    StkId ra = RA(i);\n");
-      //   printf("    int b = GETARG_B(i);\n");
-      //   printf("    int nresults = GETARG_C(i) - 1;\n");
-      //   printf("    if (b != 0) L->top = ra+b;  /* else previous instruction set top */\n");
-      //   printf("    if (luaD_precall(L, ra, nresults)) {  /* C function? */\n");
-      //   printf("      if (nresults >= 0)\n");
-      //   printf("        L->top = ci->top;  /* adjust results */\n");
-      //   printf("      Protect((void)0);  /* update 'base' */\n");
-      //   printf("    }\n");
-      //   printf("    else {  /* Lua function */\n");
-      //   printf("      luaV_execute(L);\n");
-      //   //printf("      ci = L->ci;\n");
-      //   //printf("      goto newframe;  /* restart luaV_execute over new Lua function */\n");
-      //   printf("    }\n");
-      // } break;
+      case OP_CALL: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    int b = GETARG_B(i);\n");
+        printf("    int nresults = GETARG_C(i) - 1;\n");
+        printf("    if (b != 0) L->top = ra+b;  /* else previous instruction set top */\n");
+        printf("    if (luaD_precall(L, ra, nresults)) {  /* C function? */\n");
+        printf("      if (nresults >= 0)\n");
+        printf("        L->top = ci->top;  /* adjust results */\n");
+        printf("      Protect((void)0);  /* update 'base' */\n");
+        printf("    } else {  /* Lua function */\n");
+        printf("      luaV_execute(L);\n");
+        printf("      Protect((void)0);  /* update 'base' */\n");
+        //printf("      ci = L->ci;\n");
+        //printf("      goto newframe;  /* restart luaV_execute over new Lua function */\n");
+        printf("    }\n");
+      } break;
 
       // case OP_TAILCALL: {
       // } break;
@@ -694,18 +686,9 @@ static void PrintCode(const Proto* f)
         printf("    StkId ra = RA(i);\n");
         printf("    int b = GETARG_B(i);\n");
         printf("    if (cl->p->sizep > 0) luaF_close(L, base);\n");
-        printf("    b = luaD_poscall(L, ci, ra, (b != 0 ? b - 1 : cast_int(L->top - ra)));\n");
-        printf("    if (ci->callstatus & CIST_FRESH){  /* local 'ci' still from callee */\n");
-        printf("      return_value = 1;  /* external invocation: return */\n");
-        printf("      goto done;\n");
-        printf("    } else {  /* invocation via reentry: continue execution */\n");
-        printf("      ci = L->ci;\n");
-        printf("      if (b) L->top = ci->top;\n");
-        printf("      lua_assert(isLua(ci));\n");
-        //printf("      lua_assert(GET_OPCODE(*((ci)->u.l.savedpc - 1)) == OP_CALL);\n");
-        printf("      return_value = 0;  /* restart luaV_execute over new Lua function */\n");
-        printf("      goto done;\n");
-        printf("    }\n");
+        printf("    int ret = (b != 0 ? b - 1 : cast_int(L->top - ra));\n");
+        printf("    luaD_poscall(L, ci, ra, ret);\n");
+        printf("    return ret;\n");
       } break;
      
       case OP_FORLOOP: {
@@ -796,15 +779,6 @@ static void PrintCode(const Proto* f)
     printf("  }\n");
     printf("\n");
   }
-
-  printf("  done: {\n");
-  printf("    *L_p    = L;\n");
-  printf("    *ci_p   = ci;\n");
-  printf("    *cl_p   = cl;\n");
-  printf("    *k_p    = k;\n");
-  printf("    *base_p = base;\n");
-  printf("    return return_value;\n");
-  printf("  }\n");
   printf("}\n");
   printf("\n");
 }

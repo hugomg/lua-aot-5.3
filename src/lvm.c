@@ -795,17 +795,6 @@ void luaV_execute (lua_State *L) {
   k = cl->p->k;  /* local reference to function's constant table */
   base = ci->u.l.base;  /* local copy of function's base */
 
-  /* AOT compiler hook (todo: consider changing to precall */
-  if (cl->p->magic_implementation) {
-    //printf("thrusters activated\n");
-    int fresh = cl->p->magic_implementation(&L, &ci, &cl, &k, &base);
-    if (fresh) {
-      return;
-    } else {
-      goto newframe;
-    }
-  }
-
   /* main loop of interpreter */
   for (;;) {
     Instruction i;

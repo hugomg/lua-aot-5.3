@@ -460,7 +460,15 @@ int luaD_precall (lua_State *L, StkId func, int nresults) {
       ci->callstatus = CIST_LUA;
       if (L->hookmask & LUA_MASKCALL)
         callhook(L, ci);
+
+      /* AOT compilation magic */
+      if (p->magic_implementation) {
+        p->magic_implementation(L, clLvalue(func));
+        return 1;
+      }
+
       return 0;
+
     }
     default: {  /* not a function */
       checkstackp(L, 1, func);  /* ensure space for metamethod */

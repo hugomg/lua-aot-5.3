@@ -1,9 +1,17 @@
-local function magic(n)
-    if n <= 1 then
+local function fib(n)
+    if n == 0 then
+        return 0
+    elseif n == 1 then
         return 1
     else
-        return magic(n-1) + magic(n-2)
+        return fib(n-1) + fib(n-2)
     end
 end
 
-print(magic(8))
+if magic then
+    magic(1, fib)
+end
+
+for i=0,20 do
+    print(i, fib(i))
+end
