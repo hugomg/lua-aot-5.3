@@ -697,8 +697,7 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_JMP: {
-        int sbx = GETARG_sBx(i);
-        int target = pc + sbx + 1;
+        int target = pc + GETARG_sBx(i) + 1;
         printf("    UNUSED(ra);\n");
         printf("    int a = GETARG_A(i);\n");
         printf("    if (a != 0) luaF_close(L, ci->u.l.base + a - 1);\n");
@@ -804,8 +803,7 @@ static void PrintCode(const Proto* f)
       } break;
      
       case OP_FORLOOP: {
-        int sbx = GETARG_sBx(i);
-        int target = pc + sbx + 1;
+        int target = pc + GETARG_sBx(i) + 1;
         printf("    if (ttisinteger(ra)) {  /* integer loop? */\n");
         printf("      lua_Integer step = ivalue(ra + 2);\n");
         printf("      lua_Integer idx = intop(+, ivalue(ra), step); /* increment index */\n");
@@ -830,8 +828,7 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_FORPREP: { 
-        int sbx = GETARG_sBx(i);
-        int target = pc + sbx + 1;
+        int target = pc + GETARG_sBx(i) + 1;
         printf("    TValue *init = ra;\n");
         printf("    TValue *plimit = ra + 1;\n");
         printf("    TValue *pstep = ra + 2;\n");
@@ -859,11 +856,26 @@ static void PrintCode(const Proto* f)
         printf("    goto label_%d;\n", target);
       } break;
 
-      // case OP_TFORCALL: {
-      // } break;
+      case OP_TFORCALL: {
+        printf("    StkId cb = ra + 3;  /* call base */\n");
+        printf("    setobjs2s(L, cb+2, ra+2);\n");
+        printf("    setobjs2s(L, cb+1, ra+1);\n");
+        printf("    setobjs2s(L, cb, ra);\n");
+        printf("    L->top = cb + 3;  /* func. + 2 args (state and index) */\n");
+        printf("    Protect(luaD_call(L, cb, GETARG_C(i)));\n");
+        printf("    L->top = ci->top;\n");
+
+        assert(pc+1 < nopcodes);
+        assert(GET_OPCODE(code[pc+1]) == OP_TFORLOOP);
+      } break;
  
-      // case OP_TFORLOOP: {
-      // } break;
+      case OP_TFORLOOP: {
+        int target = pc + GETARG_sBx(i) + 1;
+        printf("    if (!ttisnil(ra + 1)) {  /* continue loop? */\n");
+        printf("      setobjs2s(L, ra, ra + 1);  /* save control variable */\n");
+        printf("      goto label_%d; /* jump back */\n", target);
+        printf("    }\n");
+      } break;
 
       case OP_SETLIST: {
         assert(pc + 1 < nopcodes);
@@ -903,9 +915,10 @@ static void PrintCode(const Proto* f)
       // case OP_VARARG: {
       // } break;
 
-      // case OP_EXTRAARG: {
-      //   assert(0);
-      // } break;
+      case OP_EXTRAARG: {
+        printf("    UNUSED(ra);\n");
+        printf("    // NO OP\n");
+      } break;
 
       default: {
         fprintf(stderr, "Uninplemented opcode %s", luaP_opnames[o]);
