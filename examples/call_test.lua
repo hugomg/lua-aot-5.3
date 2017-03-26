@@ -14,6 +14,7 @@ f3 = function(n)
     local function f4()
         return n * (obj:foo())
     end
+    if magic then magic(4, f4) end
     return f4()
 end
 
@@ -27,6 +28,8 @@ obj = {
 if magic then
     magic(1, f1)
     magic(2, f2)
+    magic(3, f3)
+    magic(5, obj.foo)
 end
 
 print(f1())
