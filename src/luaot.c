@@ -411,15 +411,14 @@ static void PrintCode(const Proto* f)
 
     printf("  label_%d: {\n", pc);
     printf("    Instruction i = 0x%08x;\n", i);
+    printf("    StkId ra = RA(i);\n");
     switch (o) {
       
       case OP_MOVE: {
-        printf("    StkId ra = RA(i);\n");
         printf("    setobjs2s(L, ra, RB(i));\n");
       } break;
       
       case OP_LOADK: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = k + GETARG_Bx(i);\n");
         printf("    setobj2s(L, ra, rb);\n");
       } break;
@@ -428,7 +427,6 @@ static void PrintCode(const Proto* f)
       // } break;
       
       case OP_LOADBOOL: {
-        printf("    StkId ra = RA(i);\n");
         printf("    setbvalue(ra, GETARG_B(i));\n");
         printf("    if (GETARG_C(i)) {\n");
         printf("      goto label_%d; /* skip next instruction (if C) */\n", pc+2);
@@ -436,7 +434,6 @@ static void PrintCode(const Proto* f)
       } break;
       
       case OP_LOADNIL: {
-        printf("    StkId ra = RA(i);\n");
         printf("    int b = GETARG_B(i);\n");
         printf("    do {\n");
         printf("      setnilvalue(ra++);\n");
@@ -444,26 +441,24 @@ static void PrintCode(const Proto* f)
       } break;
  
       case OP_GETUPVAL: {
-        printf("    StkId ra = RA(i);\n");
         printf("    int b = GETARG_B(i);\n");
         printf("    setobj2s(L, ra, cl->upvals[b]->v);\n");
       } break;
      
       case OP_GETTABUP: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *upval = cl->upvals[GETARG_B(i)]->v;\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    gettableProtected(L, upval, rc, ra);\n");
       } break;
       
       case OP_GETTABLE: {
-        printf("    StkId ra = RA(i);\n");
         printf("    StkId rb = RB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    gettableProtected(L, rb, rc, ra);\n");
       } break;
 
       case OP_SETTABUP: {
+        printf("    UNUSED(ra);\n");
         printf("    TValue *upval = cl->upvals[GETARG_A(i)]->v;\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
@@ -471,21 +466,18 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_SETUPVAL: {
-        printf("    StkId ra = RA(i);\n");
         printf("    UpVal *uv = cl->upvals[GETARG_B(i)];\n");
         printf("    setobj(L, uv->v, ra);\n");
         printf("    luaC_upvalbarrier(L, uv);\n");
       } break;
  
       case OP_SETTABLE: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    settableProtected(L, ra, rb, rc);\n");
       } break;
 
       case OP_NEWTABLE: {
-        printf("    StkId ra = RA(i);\n");
         printf("    int b = GETARG_B(i);\n");
         printf("    int c = GETARG_C(i);\n");
         printf("    Table *t = luaH_new(L);\n");
@@ -499,7 +491,6 @@ static void PrintCode(const Proto* f)
       // } break;
 
       case OP_ADD: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Number nb; lua_Number nc;\n");
@@ -514,7 +505,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_SUB: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Number nb; lua_Number nc;\n");
@@ -529,7 +519,6 @@ static void PrintCode(const Proto* f)
       } break;
       
       case OP_MUL: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Number nb; lua_Number nc;\n");
@@ -544,7 +533,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_DIV: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Number nb; lua_Number nc;\n");
@@ -555,7 +543,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_BAND: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Integer ib; lua_Integer ic;\n");
@@ -566,7 +553,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_BOR: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Integer ib; lua_Integer ic;\n");
@@ -577,7 +563,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_BXOR: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Integer ib; lua_Integer ic;\n");
@@ -588,7 +573,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_SHL: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Integer ib; lua_Integer ic;\n");
@@ -599,7 +583,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_SHR: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Integer ib; lua_Integer ic;\n");
@@ -610,7 +593,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_MOD: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Number nb; lua_Number nc;\n");
@@ -627,7 +609,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_IDIV: { /* floor division */
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Number nb; lua_Number nc;\n");
@@ -642,7 +623,6 @@ static void PrintCode(const Proto* f)
       } break;
       
       case OP_POW: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    lua_Number nb; lua_Number nc;\n");
@@ -653,7 +633,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_UNM: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RB(i);\n");
         printf("    lua_Number nb;\n");
         printf("    if (ttisinteger(rb)) {\n");
@@ -669,7 +648,6 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_BNOT: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RB(i);\n");
         printf("    lua_Integer ib;\n");
         printf("    if (tointeger(rb, &ib)) {\n");
@@ -681,19 +659,16 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_NOT: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RB(i);\n");
         printf("    int res = l_isfalse(rb);  /* next assignment may change this value */\n");
         printf("    setbvalue(ra, res);\n");
       } break;
 
       case OP_LEN: {
-        printf("    StkId ra = RA(i);\n");
         printf("    Protect(luaV_objlen(L, ra, RB(i)));\n");
       } break;
 
       case OP_CONCAT: {
-        printf("    StkId ra = RA(i);\n");
         printf("    int b = GETARG_B(i);\n");
         printf("    int c = GETARG_C(i);\n");
         printf("    StkId rb;\n");
@@ -709,12 +684,14 @@ static void PrintCode(const Proto* f)
       case OP_JMP: {
         int sbx = GETARG_sBx(i);
         int target = pc + sbx + 1;
+        printf("    UNUSED(ra);\n");
         printf("    int a = GETARG_A(i);\n");
         printf("    if (a != 0) luaF_close(L, ci->u.l.base + a - 1);\n");
         printf("    goto label_%d;\n", target);
       } break;
      
       case OP_EQ: {
+        printf("    UNUSED(ra);\n");
         printf("    TValue *rb = RKB(i);\n");
         printf("    TValue *rc = RKC(i);\n");
         printf("    int cmp;\n");
@@ -727,6 +704,7 @@ static void PrintCode(const Proto* f)
       } break;
  
       case OP_LT: {
+        printf("    UNUSED(ra);\n");
         printf("    int cmp;\n");
         printf("    Protect(cmp = luaV_lessthan(L, RKB(i), RKC(i)));\n");
         printf("    if (cmp != GETARG_A(i)) {\n");
@@ -737,6 +715,7 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_LE: {
+        printf("    UNUSED(ra);\n");
         printf("    int cmp;\n");
         printf("    Protect(cmp = luaV_lessequal(L, RKB(i), RKC(i)));\n");
         printf("    if (cmp != GETARG_A(i)) {\n");
@@ -750,20 +729,16 @@ static void PrintCode(const Proto* f)
       // } break;
 
       case OP_TESTSET: {
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *rb = RB(i);\n");
         printf("    if (GETARG_C(i) ? l_isfalse(rb) : !l_isfalse(rb)) {\n");
         printf("      goto label_%d;\n", pc+2);
-        //printf("      ci->u.l.savedpc++;\n");
         printf("    } else {\n");
         printf("      setobjs2s(L, ra, rb);\n");
         printf("      goto label_%d;\n", pc+1);
-        //printf("      donextjump(ci);\n");
         printf("    }\n");
       } break;
 
       case OP_CALL: {
-        printf("    StkId ra = RA(i);\n");
         printf("    int b = GETARG_B(i);\n");
         printf("    int nresults = GETARG_C(i) - 1;\n");
         printf("    if (b != 0) L->top = ra+b;  /* else previous instruction set top */\n");
@@ -774,8 +749,6 @@ static void PrintCode(const Proto* f)
         printf("    } else {  /* Lua function */\n");
         printf("      luaV_execute(L);\n");
         printf("      Protect((void)0);  /* update 'base' */\n");
-        //printf("      ci = L->ci;\n");
-        //printf("      goto newframe;  /* restart luaV_execute over new Lua function */\n");
         printf("    }\n");
       } break;
 
@@ -783,7 +756,6 @@ static void PrintCode(const Proto* f)
       // } break;
  
       case OP_RETURN: {
-        printf("    StkId ra = RA(i);\n");
         printf("    int b = GETARG_B(i);\n");
         printf("    if (cl->p->sizep > 0) luaF_close(L, base);\n");
         printf("    int ret = (b != 0 ? b - 1 : cast_int(L->top - ra));\n");
@@ -794,13 +766,11 @@ static void PrintCode(const Proto* f)
       case OP_FORLOOP: {
         int sbx = GETARG_sBx(i);
         int target = pc + sbx + 1;
-        printf("    StkId ra = RA(i);\n");
         printf("    if (ttisinteger(ra)) {  /* integer loop? */\n");
         printf("      lua_Integer step = ivalue(ra + 2);\n");
         printf("      lua_Integer idx = intop(+, ivalue(ra), step); /* increment index */\n");
         printf("      lua_Integer limit = ivalue(ra + 1);\n");
         printf("      if ((0 < step) ? (idx <= limit) : (limit <= idx)) {\n");
-        //printf("        ci->u.l.savedpc += GETARG_sBx(i);  /* jump back */\n");
         printf("        chgivalue(ra, idx);  /* update internal index... */\n");
         printf("        setivalue(ra + 3, idx);  /* ...and external index */\n");
         printf("        goto label_%d;  /* jump back */\n", target);
@@ -812,7 +782,6 @@ static void PrintCode(const Proto* f)
         printf("      lua_Number limit = fltvalue(ra + 1);\n");
         printf("      if (luai_numlt(0, step) ? luai_numle(idx, limit)\n");
         printf("                              : luai_numle(limit, idx)) {\n");
-        //printf("        ci->u.l.savedpc += GETARG_sBx(i);  /* jump back */\n");
         printf("        chgfltvalue(ra, idx);  /* update internal index... */\n");
         printf("        setfltvalue(ra + 3, idx);  /* ...and external index */\n");
         printf("        goto label_%d;  /* jump back */\n", target);
@@ -823,7 +792,6 @@ static void PrintCode(const Proto* f)
       case OP_FORPREP: { 
         int sbx = GETARG_sBx(i);
         int target = pc + sbx + 1;
-        printf("    StkId ra = RA(i);\n");
         printf("    TValue *init = ra;\n");
         printf("    TValue *plimit = ra + 1;\n");
         printf("    TValue *pstep = ra + 2;\n");
