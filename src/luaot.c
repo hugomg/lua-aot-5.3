@@ -865,8 +865,30 @@ static void PrintCode(const Proto* f)
       // case OP_TFORLOOP: {
       // } break;
 
-      // case OP_SETLIST: {
-      // } break;
+      case OP_SETLIST: {
+        assert(pc + 1 < nopcodes);
+        Instruction next_i = code[pc+1];
+
+        printf("    int n = GETARG_B(i);\n");
+        printf("    int c = GETARG_C(i);\n");
+        printf("    unsigned int last;\n");
+        printf("    Table *h;\n");
+        printf("    if (n == 0) n = cast_int(L->top - ra) - 1;\n");
+        printf("    if (c == 0) {\n");
+        printf("      lua_assert(GET_OPCODE(%d) == OP_EXTRAARG);\n", next_i);
+        printf("      c = GETARG_Ax(%d);\n", next_i);
+        printf("    }\n");
+        printf("    h = hvalue(ra);\n");
+        printf("    last = ((c-1)*LFIELDS_PER_FLUSH) + n;\n");
+        printf("    if (last > h->sizearray)  /* needs more space? */\n");
+        printf("      luaH_resizearray(L, h, last);  /* preallocate it at once */\n");
+        printf("    for (; n > 0; n--) {\n");
+        printf("      TValue *val = ra+n;\n");
+        printf("      luaH_setint(L, h, last--, val);\n");
+        printf("      luaC_barrierback(L, h, val);\n");
+        printf("    }\n");
+        printf("    L->top = ci->top;  /* correct top (in case of previous open call) */\n");
+      } break;
 
       case OP_CLOSURE: {
         printf("    Proto *p = cl->p->p[GETARG_Bx(i)];\n");
