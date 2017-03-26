@@ -429,8 +429,14 @@ static void PrintCode(const Proto* f)
         printf("    setobj2s(L, ra, rb);\n");
       } break;
 
-      // case OP_LOADKX: {
-      // } break;
+      case OP_LOADKX: {
+        assert(pc + 1 < nopcodes);
+        Instruction next_i = code[pc+1];
+        printf("    TValue *rb;\n");
+        printf("    lua_assert(GET_OPCODE(%d) == OP_EXTRAARG);\n", next_i);
+        printf("    rb = k + GETARG_Ax(%d);\n", next_i);
+        printf("    setobj2s(L, ra, rb);\n");
+      } break;
       
       case OP_LOADBOOL: {
         printf("    setbvalue(ra, GETARG_B(i));\n");
@@ -938,9 +944,6 @@ static void PrintCode(const Proto* f)
       default: {
         fprintf(stderr, "Uninplemented opcode %s", luaP_opnames[o]);
         fatal("aborting");
-        //printf("    //\n");
-        //printf("    // NOT IMPLEMENTED\n");
-        //printf("    //\n");
       } break;
     }
     printf("  }\n");
