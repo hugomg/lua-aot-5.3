@@ -427,11 +427,13 @@ static void PrintCode(const Proto* f)
       // case OP_LOADKX: {
       // } break;
       
-      //case OP_LOADBOOL: {
-      //  printf("    StkId ra = RA(i);\n");
-      //  printf("    setbvalue(ra, GETARG_B(i));\n");
-      //  printf("    if (GETARG_C(i)) ci->u.l.savedpc++;  /* skip next instruction (if C) */\n");
-      //} break;
+      case OP_LOADBOOL: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    setbvalue(ra, GETARG_B(i));\n");
+        printf("    if (GETARG_C(i)) {\n");
+        printf("      goto label_%d; /* skip next instruction (if C) */\n", pc+2);
+        printf("    }\n");
+      } break;
       
       case OP_LOADNIL: {
         printf("    StkId ra = RA(i);\n");
@@ -552,26 +554,77 @@ static void PrintCode(const Proto* f)
         printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_DIV)); }\n");
       } break;
 
-      // case OP_BAND: {
-      // } break;
+      case OP_BAND: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RKB(i);\n");
+        printf("    TValue *rc = RKC(i);\n");
+        printf("    lua_Integer ib; lua_Integer ic;\n");
+        printf("    if (tointeger(rb, &ib) && tointeger(rc, &ic)) {\n");
+        printf("      setivalue(ra, intop(&, ib, ic));\n");
+        printf("    }\n");
+        printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_BAND)); }\n");
+      } break;
 
-      // case OP_BOR: {
-      // } break;
+      case OP_BOR: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RKB(i);\n");
+        printf("    TValue *rc = RKC(i);\n");
+        printf("    lua_Integer ib; lua_Integer ic;\n");
+        printf("    if (tointeger(rb, &ib) && tointeger(rc, &ic)) {\n");
+        printf("      setivalue(ra, intop(|, ib, ic));\n");
+        printf("    }\n");
+        printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_BOR)); }\n");
+      } break;
 
-      // case OP_BXOR: {
-      // } break;
+      case OP_BXOR: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RKB(i);\n");
+        printf("    TValue *rc = RKC(i);\n");
+        printf("    lua_Integer ib; lua_Integer ic;\n");
+        printf("    if (tointeger(rb, &ib) && tointeger(rc, &ic)) {\n");
+        printf("      setivalue(ra, intop(^, ib, ic));\n");
+        printf("    }\n");
+        printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_BXOR)); }\n");
+      } break;
 
-      // case OP_SHL: {
-      // } break;
+      case OP_SHL: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RKB(i);\n");
+        printf("    TValue *rc = RKC(i);\n");
+        printf("    lua_Integer ib; lua_Integer ic;\n");
+        printf("    if (tointeger(rb, &ib) && tointeger(rc, &ic)) {\n");
+        printf("      setivalue(ra, luaV_shiftl(ib, ic));\n");
+        printf("    }\n");
+        printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_SHL)); }\n");
+      } break;
 
-      // case OP_SHL: {
-      // } break;
+      case OP_SHR: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RKB(i);\n");
+        printf("    TValue *rc = RKC(i);\n");
+        printf("    lua_Integer ib; lua_Integer ic;\n");
+        printf("    if (tointeger(rb, &ib) && tointeger(rc, &ic)) {\n");
+        printf("      setivalue(ra, luaV_shiftl(ib, -ic));\n");
+        printf("    }\n");
+        printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_SHR)); }\n");
+      } break;
 
-      // case OP_SHR: {
-      // } break;
-
-      // case OP_MOD: {
-      // } break;
+      case OP_MOD: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RKB(i);\n");
+        printf("    TValue *rc = RKC(i);\n");
+        printf("    lua_Number nb; lua_Number nc;\n");
+        printf("    if (ttisinteger(rb) && ttisinteger(rc)) {\n");
+        printf("      lua_Integer ib = ivalue(rb); lua_Integer ic = ivalue(rc);\n");
+        printf("      setivalue(ra, luaV_mod(L, ib, ic));\n");
+        printf("    }\n");
+        printf("    else if (tonumber(rb, &nb) && tonumber(rc, &nc)) {\n");
+        printf("      lua_Number m;\n");
+        printf("      luai_nummod(L, nb, nc, m);\n");
+        printf("      setfltvalue(ra, m);\n");
+        printf("    }\n");
+        printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_MOD)); }\n");
+      } break;
 
       case OP_IDIV: { /* floor division */
         printf("    StkId ra = RA(i);\n");
@@ -588,23 +641,70 @@ static void PrintCode(const Proto* f)
         printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_IDIV)); }\n");
       } break;
       
-      // case OP_POW: {
-      // } break;
+      case OP_POW: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RKB(i);\n");
+        printf("    TValue *rc = RKC(i);\n");
+        printf("    lua_Number nb; lua_Number nc;\n");
+        printf("    if (tonumber(rb, &nb) && tonumber(rc, &nc)) {\n");
+        printf("      setfltvalue(ra, luai_numpow(L, nb, nc));\n");
+        printf("    }\n");
+        printf("    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_POW)); }\n");
+      } break;
 
-      // case OP_UNM: {
-      // } break;
+      case OP_UNM: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RB(i);\n");
+        printf("    lua_Number nb;\n");
+        printf("    if (ttisinteger(rb)) {\n");
+        printf("      lua_Integer ib = ivalue(rb);\n");
+        printf("      setivalue(ra, intop(-, 0, ib));\n");
+        printf("    }\n");
+        printf("    else if (tonumber(rb, &nb)) {\n");
+        printf("      setfltvalue(ra, luai_numunm(L, nb));\n");
+        printf("    }\n");
+        printf("    else {\n");
+        printf("      Protect(luaT_trybinTM(L, rb, rb, ra, TM_UNM));\n");
+        printf("    }\n");
+      } break;
 
-      // case OP_BNOT: {
-      // } break;
+      case OP_BNOT: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RB(i);\n");
+        printf("    lua_Integer ib;\n");
+        printf("    if (tointeger(rb, &ib)) {\n");
+        printf("      setivalue(ra, intop(^, ~l_castS2U(0), ib));\n");
+        printf("    }\n");
+        printf("    else {\n");
+        printf("      Protect(luaT_trybinTM(L, rb, rb, ra, TM_BNOT));\n");
+        printf("    }\n");
+      } break;
 
-      // case OP_NOT: {
-      // } break;
+      case OP_NOT: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    TValue *rb = RB(i);\n");
+        printf("    int res = l_isfalse(rb);  /* next assignment may change this value */\n");
+        printf("    setbvalue(ra, res);\n");
+      } break;
 
-      // case OP_LEN: {
-      // } break;
+      case OP_LEN: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    Protect(luaV_objlen(L, ra, RB(i)));\n");
+      } break;
 
-      // case OP_CONCAT: {
-      // } break;
+      case OP_CONCAT: {
+        printf("    StkId ra = RA(i);\n");
+        printf("    int b = GETARG_B(i);\n");
+        printf("    int c = GETARG_C(i);\n");
+        printf("    StkId rb;\n");
+        printf("    L->top = base + c + 1;  /* mark the end of concat operands */\n");
+        printf("    Protect(luaV_concat(L, c - b + 1));\n");
+        printf("    ra = RA(i);  /* 'luaV_concat' may invoke TMs and move the stack */\n");
+        printf("    rb = base + b;\n");
+        printf("    setobjs2s(L, ra, rb);\n");
+        printf("    checkGC(L, (ra >= rb ? ra + 1 : rb));\n");
+        printf("    L->top = ci->top;  /* restore top */\n");
+      } break;
 
       case OP_JMP: {
         int sbx = GETARG_sBx(i);
@@ -771,9 +871,11 @@ static void PrintCode(const Proto* f)
       // } break;
 
       default: {
-        printf("    //\n");
-        printf("    // NOT IMPLEMENTED\n");
-        printf("    //\n");
+        fprintf(stderr, "Uninplemented opcode %s", luaP_opnames[o]);
+        fatal("aborting");
+        //printf("    //\n");
+        //printf("    // NOT IMPLEMENTED\n");
+        //printf("    //\n");
       } break;
     }
     printf("  }\n");
