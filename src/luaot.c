@@ -912,8 +912,23 @@ static void PrintCode(const Proto* f)
         printf("    checkGC(L, ra + 1);\n");
       } break;
 
-      // case OP_VARARG: {
-      // } break;
+      case OP_VARARG: {
+        printf("    int b = GETARG_B(i) - 1;  /* required results */\n");
+        printf("    int j;\n");
+        printf("    int n = cast_int(base - ci->func) - cl->p->numparams - 1;\n");
+        printf("    if (n < 0)  /* less arguments than parameters? */\n");
+        printf("      n = 0;  /* no vararg arguments */\n");
+        printf("    if (b < 0) {  /* B == 0? */\n");
+        printf("      b = n;  /* get all var. arguments */\n");
+        printf("      Protect(luaD_checkstack(L, n));\n");
+        printf("      ra = RA(i);  /* previous call may change the stack */\n");
+        printf("      L->top = ra + n;\n");
+        printf("    }\n");
+        printf("    for (j = 0; j < b && j < n; j++)\n");
+        printf("      setobjs2s(L, ra + j, base - n + j);\n");
+        printf("    for (; j < b; j++)  /* complete required results with nil */\n");
+        printf("      setnilvalue(ra + j);\n");
+      } break;
 
       case OP_EXTRAARG: {
         printf("    UNUSED(ra);\n");
