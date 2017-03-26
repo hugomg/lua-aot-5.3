@@ -734,8 +734,13 @@ static void PrintCode(const Proto* f)
         printf("    }\n");
       } break;
      
-      // case OP_TEST: {
-      // } break;
+      case OP_TEST: {
+        printf("    if (GETARG_C(i) ? l_isfalse(ra) : !l_isfalse(ra)) {\n");
+        printf("      goto label_%d;\n", pc+2);
+        printf("    } else {\n");
+        printf("      goto label_%d;\n", pc+1);
+        printf("    }\n");
+      } break;
 
       case OP_TESTSET: {
         printf("    TValue *rb = RB(i);\n");
