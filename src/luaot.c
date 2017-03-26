@@ -487,8 +487,17 @@ static void PrintCode(const Proto* f)
         printf("    checkGC(L, ra + 1);\n");
       } break;
 
-      // case OP_SELF: {
-      // } break;
+      case OP_SELF: {
+        printf("    const TValue *aux;\n");
+        printf("    StkId rb = RB(i);\n");
+        printf("    TValue *rc = RKC(i);\n");
+        printf("    TString *key = tsvalue(rc);  /* key must be a string */\n");
+        printf("    setobjs2s(L, ra + 1, rb);\n");
+        printf("    if (luaV_fastget(L, rb, key, aux, luaH_getstr)) {\n");
+        printf("      setobj2s(L, ra, aux);\n");
+        printf("    }\n");
+        printf("    else Protect(luaV_finishget(L, rb, rc, ra, aux));\n");
+      } break;
 
       case OP_ADD: {
         printf("    TValue *rb = RKB(i);\n");

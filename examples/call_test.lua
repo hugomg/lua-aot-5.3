@@ -1,5 +1,6 @@
 
 local f1, f2, f3
+local obj
 
 f1 = function()
     return 1 + f2()
@@ -10,8 +11,15 @@ f2 = function()
 end
 
 f3 = function(n)
-    return 10 * n
+    return n * (obj:foo())
 end
+
+obj = {
+    x = 10,
+    foo = function(self)
+        return self.x
+    end
+}
 
 if magic then
     magic(1, f1)
