@@ -11,7 +11,10 @@ f2 = function()
 end
 
 f3 = function(n)
-    return n * (obj:foo())
+    local function f4()
+        return n * (obj:foo())
+    end
+    return f4()
 end
 
 obj = {

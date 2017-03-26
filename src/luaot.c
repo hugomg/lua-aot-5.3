@@ -401,7 +401,13 @@ static void PrintCode(const Proto* f)
   printf("  TValue *k = cl->p->k;\n");
   printf("  StkId base = ci->u.l.base;\n");
   printf("  \n");
+  printf("  // Avoid warnings if the function has few opcodes:\n");
+  printf("  UNUSED(ci);\n");
+  printf("  UNUSED(k);\n");
+  printf("  UNUSED(base);\n");
+  printf("  \n");
  
+
   for (int pc=0; pc<nopcodes; pc++)
   {
     PrintOpcodeComment(f, pc);
@@ -862,8 +868,15 @@ static void PrintCode(const Proto* f)
       // case OP_SETLIST: {
       // } break;
 
-      // case OP_CLOSURE: {
-      // } break;
+      case OP_CLOSURE: {
+        printf("    Proto *p = cl->p->p[GETARG_Bx(i)];\n");
+        printf("    LClosure *ncl = luaV_getcached(p, cl->upvals, base);  /* cached closure*/\n");
+        printf("    if (ncl == NULL)  /* no match? */\n");
+        printf("      luaV_pushclosure(L, p, cl->upvals, base, ra);  /* create a new one */\n");
+        printf("    else\n");
+        printf("      setclLvalue(L, ra, ncl);  /* push cashed closure */\n");
+        printf("    checkGC(L, ra + 1);\n");
+      } break;
 
       // case OP_VARARG: {
       // } break;
