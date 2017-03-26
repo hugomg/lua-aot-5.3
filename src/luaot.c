@@ -10,6 +10,7 @@
 
 #include "lprefix.h"
 
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -387,8 +388,7 @@ static void PrintOpcodeComment(const Proto *f, int pc)
 static void PrintCode(const Proto* f)
 {
   const Instruction* code=f->code;
-  int pc,n=f->sizecode;
-
+  int nopcodes=f->sizecode;
 
   printf("// source = %s\n", getstr(f->source));
   printf("// linedefined = %d\n", f->linedefined);
@@ -402,7 +402,7 @@ static void PrintCode(const Proto* f)
   printf("  StkId base = ci->u.l.base;\n");
   printf("  \n");
  
-  for (pc=0; pc<n; pc++)
+  for (int pc=0; pc<nopcodes; pc++)
   {
     PrintOpcodeComment(f, pc);
 
@@ -752,8 +752,28 @@ static void PrintCode(const Proto* f)
         printf("    }\n");
       } break;
 
-      // case OP_TAILCALL: {
-      // } break;
+      case OP_TAILCALL: {
+        printf("    int b = GETARG_B(i);\n");
+        printf("    if (b != 0) L->top = ra+b;  /* else previous instruction set top */\n");
+        printf("    lua_assert(GETARG_C(i) - 1 == LUA_MULTRET);\n");
+        printf("    if (luaD_precall(L, ra, LUA_MULTRET)) {  /* C function? */\n");
+        printf("      Protect((void)0);  /* update 'base' */\n");
+        printf("    }\n");
+        printf("    else {\n");
+        printf("      luaV_execute(L);\n");
+        printf("      Protect((void)0);  /* update 'base' */\n");
+        printf("    }\n");
+
+        // I think the "tailcall a c function" path assumes that the next instruction
+        // is a return statement and that I can use this on the regular calls as well
+        // since we are throwing away the idea of tail calls anyway.
+        //
+        // But lets check that just in case
+        assert(pc+1 < nopcodes);
+        Instruction next = code[pc+1];
+        assert(GET_OPCODE(next) == OP_RETURN);
+        assert(GETARG_B(next) == 0);
+      } break;
  
       case OP_RETURN: {
         printf("    int b = GETARG_B(i);\n");
