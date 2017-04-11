@@ -10,7 +10,7 @@
 
 local count = 0
 
-local function sieve(num, lim)
+function main(num, lim)
     local flags = {}
     for num=num,1,-1 do
         count = 0
@@ -31,7 +31,7 @@ end
 
 
 if magic then
-    magic(1, sieve)
+    magic(1, main)
 end
 
 --NUM = tonumber((arg and arg[1])) or 100

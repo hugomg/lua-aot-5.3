@@ -8,13 +8,15 @@
 -- http://benchmarksgame.alioth.debian.org/
 -- contributed by Mike Pall
 
+local benchmark_util = require 'examples/util'
+
 local function main()
     local width = 1000
     local height, wscale = width, 2/width
     local m, limit2 = 50, 4.0
     local write, char = io.write, string.char 
 
-    --write("P4\n", width, " ", height, "\n")
+   -- write("P4\n", width, " ", height, "\n")
 
     for y=0,height-1 do
       local Ci = 2*y / height - 1
@@ -49,4 +51,4 @@ if magic then
     magic(1, main)
 end
 
-main()
+benchmark_util(main)

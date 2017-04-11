@@ -2,6 +2,7 @@
 --floor = math.ifloor or floor
 
 local random = math.random
+--local floor = math.ifloor or math.floor
 
 --heapsort
 function heapsort(n, ra)
@@ -40,30 +41,15 @@ function heapsort(n, ra)
     end
 end
 
---local Num = tonumber((arg and arg[1])) or 5
-
-local N = 100000
-local xs = {}
-for i = 1,N do
-  xs[i] = random()
-end
-
-local ys = {}
-for i=1,N do
-  ys[i] = 0
-end
-
 if magic then
-    magic(1, heapsort)
+  magic(1, heapsort)
 end
 
-local REP = 20
-for i=1,REP do
-  for i=1,N do
-    ys[i] = xs[i]
-  end
-  heapsort(N, ys)
-  for i=1,N-1 do
-    assert(ys[i] <= ys[i+1])
-  end
+local Num = tonumber((arg and arg[1])) or 5
+for i=1,Num do
+  local N = tonumber((arg and arg[2])) or 100000
+  local a = {}
+  for i=1,N do a[i] = random() end
+  heapsort(N, a)
+  for i=1,N-1 do assert(a[i] <= a[i+1]) end
 end

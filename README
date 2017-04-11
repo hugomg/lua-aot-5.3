@@ -1,3 +1,44 @@
+Lua AOT compiler. A modified Lua virtual machine that can compile Lua code to C code.
+
+
+How to use:
+  1) Run the Makefile inside the src directory
+  2) Run configure inside the experiments directory
+  3) Run the Makefile inside the experiments directory
+  4) Run the programs using the `run` and `runbenchmarks` scripts.
+
+- src/ contains a modified Lua VM and the luaot compiler that generated a C
+  module from a Lua source file
+
+  The LuaVM has very few modifications. Basically, an extra field in Proto and
+  some private functions were made public. In theory the Lua module could have
+  been converted to an equivalent C module that is indistinguishable if you
+  `require` it. But the current implementation is a lot more hacky than that.
+  At the moment, you are expected to load the C module with `lua -l module.so`
+  and the C module exposes on the global scope a `magic` function that can
+  modify a given Lua closure to use an optimized C implementation. For example,
+  `magic(1, f)` changes f to that when f is called it runs the code from the
+  1st pre-compiled function from the C module. It is your responsibility to
+  make sure that the indices match.
+
+- experiments/ has all the test files for my experiments
+
+  The lua files in the examples folders are converted to c files and then compiled
+  to "so" dynamic libraries. The ./configure.py generates a makefile for everything.
+  
+  Use the `run` file to do a standalone test. Take a look inside to see how things work
+  
+     ./run examples/foo.lua          # normal version
+     ./run examples/foo.lua --fast   # optimized version
+
+  The runbenchmarks is the script from https://github.com/gligneul/Lua-Low-Level, but with
+  some tweaks to get everything to run.
+  
+
+
+-------------------
+
+Original README:
 
 This is Lua 5.3.4, released on 12 Jan 2017.
 
