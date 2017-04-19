@@ -1,34 +1,29 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-static int magic(lua_State *L) {
-    
-    luaL_checktype(L, 1, LUA_TNUMBER);
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-    if (lua_tocfunction(L, 2) != NULL) {
-        lua_pop(L, 2);
-        lua_pushliteral(L, "not a Lua closure");
-        lua_error(L);
-        return 0; /* never reached */
-    }
-    
+static void bind_magic(Proto *p, int *next_id)
+{
+    p->magic_implementation = zz_magic_functions[*next_id];
+    *next_id = *next_id + 1;
 
-    lua_Integer ix = lua_tointeger(L, 1);
-    if (!(1 <= ix && ix <= NFUNCTIONS)) {
-        lua_pop(L, 2);
-        lua_pushliteral(L, "index out of range");
-        lua_error(L);
-        return 0; /* never reached */
+    for(int i=0; i < p->sizep; i++) {
+        bind_magic(p->p[i], next_id);
     }
-    
-    LClosure *cl = (void *) lua_topointer(L, 2);
-    cl->p->magic_implementation = zz_magic_functions[ix-1];
-
-    return 0;
 }
 
 int ZZ_LUAOPEN_NAME (lua_State *L) {
-    lua_pushcfunction(L, magic);
-    lua_setglobal(L, "magic");
-    return 0;
+    
+    int ok = luaL_loadstring(L, ZZ_ORIGINAL_SOURCE_CODE);
+    if (ok != LUA_OK) {
+        fprintf(stderr, "could not load file\n");
+        exit(1);
+    }
+
+    LClosure *cl = (void *) lua_topointer(L, -1);
+
+    int next_id = 0;
+    bind_magic(cl->p, &next_id);
+
+    lua_call(L, 0, 1);
+    return 1;
 }
