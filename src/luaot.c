@@ -42,227 +42,227 @@ static FILE * OUTFILE;
 
 static void fatal(const char* message)
 {
-    fprintf(stderr,"%s: %s\n",progname,message);
-    exit(EXIT_FAILURE);
+  fprintf(stderr,"%s: %s\n",progname,message);
+  exit(EXIT_FAILURE);
 }
 
 static void usage()
 {
-    fprintf(stderr,"usage: %s INPUT -o OUTPUT\n", progname);
-    exit(EXIT_FAILURE);
+  fprintf(stderr,"usage: %s INPUT -o OUTPUT\n", progname);
+  exit(EXIT_FAILURE);
 }
 
 // Throw away the directory of a filename
 char * basename (const char *path)
 {
-    const char *start = path;
-    for (const char *s = path; *s != '\0'; s++){
-        if (*s == '/') {
-            start = s + 1;
-        }
+  const char *start = path;
+  for (const char *s = path; *s != '\0'; s++){
+    if (*s == '/') {
+      start = s + 1;
     }
+  }
 
-    return strdup(start);
+  return strdup(start);
 }
 
 // Split a filename into a name and extension.
 void split_ext(const char *path, char **noext_out, char **ext_out)
 {
-    char * pathcopy = strdup(path);
+  char * pathcopy = strdup(path);
 
-    char * dot = strrchr(pathcopy, '.');
-    if (dot) {
-        *dot = '\0';
-        *noext_out = strdup(pathcopy);
-        *ext_out = strdup(dot+1);
-    } else {
-        *noext_out = NULL;
-        *ext_out = NULL;
-    }
+  char * dot = strrchr(pathcopy, '.');
+  if (dot) {
+    *dot = '\0';
+    *noext_out = strdup(pathcopy);
+    *ext_out = strdup(dot+1);
+  } else {
+    *noext_out = NULL;
+    *ext_out = NULL;
+  }
 
-    free (pathcopy);
+  free (pathcopy);
 }
 
 static void doargs(int argc, char* argv[])
 {
-    progname = DEFAULT_PROGNAME;
-    input_filename = NULL;
-    output_filename = NULL;
-    module_name = NULL;
+  progname = DEFAULT_PROGNAME;
+  input_filename = NULL;
+  output_filename = NULL;
+  module_name = NULL;
 
-    if (argv[0] !=NULL && argv[0][0] != '\0') {
-        progname=argv[0];
-    }
+  if (argv[0] !=NULL && argv[0][0] != '\0') {
+    progname=argv[0];
+  }
 
-    int npos = 0;
-    int reading_options = 1;
-    for (int i=1; i < argc; i++) {
-        const char *arg = argv[i];
+  int npos = 0;
+  int reading_options = 1;
+  for (int i=1; i < argc; i++) {
+    const char *arg = argv[i];
 
-        if (reading_options && arg[0] == '-') {
-            
-            if (0 == strcmp(arg, "--")) {
-                reading_options = 0;
-            } else if (0 == strcmp(arg, "-h") || 0 == strcmp(arg, "--help")){
-                usage();
-            } else if (0 == strcmp(arg, "-o")) {
-                i += 1;
-                if (i >= argc ) {
-                    fprintf(stderr, "%s: Missing argument for -o\n", progname);
-                    usage();
-                }
-                output_filename = argv[i];
-            } else {
-                fprintf(stderr,"%s: Unrecognized option %s\n", progname, arg);
-                usage();
-            }
+    if (reading_options && arg[0] == '-') {
 
-        } else {
-
-            if (npos == 0) {
-                input_filename = arg;
-            } else {
-                fprintf(stderr,"%s: Too many positional parameters\n", progname);
-                usage();
-            }
-
-            npos++;
-        }
-    }
-
-    if (npos < 1) {
-        fprintf(stderr, "%s: Too few positional parameters\n", progname);
+      if (0 == strcmp(arg, "--")) {
+        reading_options = 0;
+      } else if (0 == strcmp(arg, "-h") || 0 == strcmp(arg, "--help")){
         usage();
-    }
-
-    if (!output_filename) {
-        fprintf(stderr, "%s, -o option is required\n", progname);
-        usage();
-    }
-
-    char * input_basename = NULL;
-    char * input_basename_noext = NULL;
-    char * input_basename_ext = NULL;
-
-    char * output_basename = NULL;
-    char * output_basename_noext = NULL;
-    char * output_basename_ext = NULL;
-
-    input_basename = basename(input_filename);
-    output_basename = basename(output_filename);
-
-    split_ext(input_basename, &input_basename_noext, &input_basename_ext);
-    if (input_basename_ext == NULL || 0 != strcmp(input_basename_ext, "lua")) {
-        fatal("input file must have a .lua extension");
-    }
-    
-    split_ext(output_basename, &output_basename_noext, &output_basename_ext);
-    if (output_basename_ext == NULL || 0 != strcmp(output_basename_ext, "c")) {
-        fatal("output file must have a .c extension");
-    }
-
-    if (0 != strcmp(input_basename_noext, output_basename_noext)) {
-        fatal("the names of the input and output files must match");
-        // We do this because the C module needs to know its Lua module name
-        // because of the luaopen_ interface and it is easier for everyone
-        // if I force the ".lua", ".c" and ".so" filenames to match.
-    }
-
-    module_name = strdup(input_basename_noext);
-
-    for (const char *s = module_name; *s != '\0'; s++) {
-        if (! (isalnum(*s) || *s == '_')) {
-            fatal("the name of the input module contains invalid characters (only letters, numbers and underscores are allowed).");
+      } else if (0 == strcmp(arg, "-o")) {
+        i += 1;
+        if (i >= argc ) {
+          fprintf(stderr, "%s: Missing argument for -o\n", progname);
+          usage();
         }
+        output_filename = argv[i];
+      } else {
+        fprintf(stderr,"%s: Unrecognized option %s\n", progname, arg);
+        usage();
+      }
+
+    } else {
+
+      if (npos == 0) {
+        input_filename = arg;
+      } else {
+        fprintf(stderr,"%s: Too many positional parameters\n", progname);
+        usage();
+      }
+
+      npos++;
     }
+  }
 
-    free(input_basename);
-    free(input_basename_noext);
-    free(input_basename_ext);
+  if (npos < 1) {
+    fprintf(stderr, "%s: Too few positional parameters\n", progname);
+    usage();
+  }
 
-    free(output_basename);
-    free(output_basename_noext);
-    free(output_basename_ext);
+  if (!output_filename) {
+    fprintf(stderr, "%s, -o option is required\n", progname);
+    usage();
+  }
+
+  char * input_basename = NULL;
+  char * input_basename_noext = NULL;
+  char * input_basename_ext = NULL;
+
+  char * output_basename = NULL;
+  char * output_basename_noext = NULL;
+  char * output_basename_ext = NULL;
+
+  input_basename = basename(input_filename);
+  output_basename = basename(output_filename);
+
+  split_ext(input_basename, &input_basename_noext, &input_basename_ext);
+  if (input_basename_ext == NULL || 0 != strcmp(input_basename_ext, "lua")) {
+    fatal("input file must have a .lua extension");
+  }
+
+  split_ext(output_basename, &output_basename_noext, &output_basename_ext);
+  if (output_basename_ext == NULL || 0 != strcmp(output_basename_ext, "c")) {
+    fatal("output file must have a .c extension");
+  }
+
+  if (0 != strcmp(input_basename_noext, output_basename_noext)) {
+    fatal("the names of the input and output files must match");
+    // We do this because the C module needs to know its Lua module name
+    // because of the luaopen_ interface and it is easier for everyone
+    // if I force the ".lua", ".c" and ".so" filenames to match.
+  }
+
+  module_name = strdup(input_basename_noext);
+
+  for (const char *s = module_name; *s != '\0'; s++) {
+    if (! (isalnum(*s) || *s == '_')) {
+      fatal("the name of the input module contains invalid characters (only letters, numbers and underscores are allowed).");
+    }
+  }
+
+  free(input_basename);
+  free(input_basename_noext);
+  free(input_basename_ext);
+
+  free(output_basename);
+  free(output_basename_noext);
+  free(output_basename_ext);
 }
 
 #define toproto(L,i) getproto(L->top+(i))
 
 static int pmain(lua_State* L)
 {
-    if (luaL_loadfile(L, input_filename) != LUA_OK) fatal(lua_tostring(L,-1));
+  if (luaL_loadfile(L, input_filename) != LUA_OK) fatal(lua_tostring(L,-1));
 
-    const Proto* f = toproto(L, -1);
+  const Proto* f = toproto(L, -1);
 
-    fprintf(OUTFILE, "#include \"luaot-generated-header.c\"\n");
+  fprintf(OUTFILE, "#include \"luaot-generated-header.c\"\n");
+  fprintf(OUTFILE, "\n");
+
+  {
+    // Generated C implementations
+    NFUNCTIONS = 0;
+    PrintFunction(f);
+  }
+
+  {
+    fprintf(OUTFILE, "ZZ_MAGIC_FUNC zz_magic_functions[%d] = {\n", NFUNCTIONS);
+    for (int i=0; i < NFUNCTIONS; i++) {
+      fprintf(OUTFILE, "  zz_magic_function_%d,\n", i);
+    }
+    fprintf(OUTFILE, "};\n");
+    fprintf(OUTFILE, "\n");
+  }
+
+  {
+    // The original Lua code
+    //
+    // We need this right now because our code works by taking an existing
+    // Proto* and patching it by setting the magic_implementation field.
+    //
+    // Right now I am serializing the Lua source code (as a char array because
+    // trying to serialize as a string blew the C99 maximum string length).
+    // I would prefer to only serialize as bytecode or perhaps even only serialize 
+    // the parts of the Proto* that we need but I couldn't figure out how to do 
+    // this yet.
+
+    FILE *infile = fopen(input_filename, "r");
+    if (!infile) fatal("could not open input file");
+
+    fprintf(OUTFILE, "const char ZZ_ORIGINAL_SOURCE_CODE[] = {\n");
+    {int c; while (c = fgetc(infile), c != EOF) {
+                                                  fprintf(OUTFILE, "%d, ", c);
+                                                }}
+    fprintf(OUTFILE, "};\n");
     fprintf(OUTFILE, "\n");
 
-    {
-        // Generated C implementations
-        NFUNCTIONS = 0;
-        PrintFunction(f);
-    }
-    
-    {
-        fprintf(OUTFILE, "ZZ_MAGIC_FUNC zz_magic_functions[%d] = {\n", NFUNCTIONS);
-        for (int i=0; i < NFUNCTIONS; i++) {
-            fprintf(OUTFILE, "  zz_magic_function_%d,\n", i);
-        }
-        fprintf(OUTFILE, "};\n");
-        fprintf(OUTFILE, "\n");
-    }
+    fclose(infile);
 
-    {
-        // The original Lua code
-        //
-        // We need this right now because our code works by taking an existing
-        // Proto* and patching it by setting the magic_implementation field.
-        //
-        // Right now I am serializing the Lua source code (as a char array because
-        // trying to serialize as a string blew the C99 maximum string length).
-        // I would prefer to only serialize as bytecode or perhaps even only serialize 
-        // the parts of the Proto* that we need but I couldn't figure out how to do 
-        // this yet.
-        
-        FILE *infile = fopen(input_filename, "r");
-        if (!infile) fatal("could not open input file");
+  }
 
-        fprintf(OUTFILE, "const char ZZ_ORIGINAL_SOURCE_CODE[] = {\n");
-        {int c; while (c = fgetc(infile), c != EOF) {
-            fprintf(OUTFILE, "%d, ", c);
-        }}
-        fprintf(OUTFILE, "};\n");
-        fprintf(OUTFILE, "\n");
+  fprintf(OUTFILE, "#define ZZ_LUAOPEN_NAME luaopen_%s\n", module_name);
+  fprintf(OUTFILE, "\n");
 
-        fclose(infile);
- 
-    }
+  fprintf(OUTFILE, "#include \"luaot-generated-footer.c\"\n");
 
-    fprintf(OUTFILE, "#define ZZ_LUAOPEN_NAME luaopen_%s\n", module_name);
-    fprintf(OUTFILE, "\n");
-
-    fprintf(OUTFILE, "#include \"luaot-generated-footer.c\"\n");
-
-    return 0;
+  return 0;
 }
 
 int main(int argc, char* argv[])
 {
-    doargs(argc,argv);
+  doargs(argc,argv);
 
-    OUTFILE = fopen(output_filename, "w");
-    if (!OUTFILE) {
-        fatal("could not open output file for writing");
-    }
+  OUTFILE = fopen(output_filename, "w");
+  if (!OUTFILE) {
+    fatal("could not open output file for writing");
+  }
 
-    lua_State* L = luaL_newstate();
-    if (L==NULL) fatal("cannot create state: not enough memory");
-    lua_pushcfunction(L, &pmain);
-    if (lua_pcall(L,0,0,0)!=LUA_OK) fatal(lua_tostring(L,-1));
-    lua_close(L);
+  lua_State* L = luaL_newstate();
+  if (L==NULL) fatal("cannot create state: not enough memory");
+  lua_pushcfunction(L, &pmain);
+  if (lua_pcall(L,0,0,0)!=LUA_OK) fatal(lua_tostring(L,-1));
+  lua_close(L);
 
-    fclose(OUTFILE);
+  fclose(OUTFILE);
 
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
 
 /*
@@ -285,61 +285,61 @@ int main(int argc, char* argv[])
 
 static void PrintString(const TString* ts)
 {
- const char* s=getstr(ts);
- size_t i,n=tsslen(ts);
- fprintf(OUTFILE, "%c",'"');
- for (i=0; i<n; i++)
- {
-  int c=(int)(unsigned char)s[i];
-  switch (c)
+  const char* s = getstr(ts);
+  size_t i,n=tsslen(ts);
+  fprintf(OUTFILE, "%c",'"');
+  for (i=0; i<n; i++)
   {
-   case '"':  fprintf(OUTFILE, "\\\""); break;
-   case '\\': fprintf(OUTFILE, "\\\\"); break;
-   case '\a': fprintf(OUTFILE, "\\a"); break;
-   case '\b': fprintf(OUTFILE, "\\b"); break;
-   case '\f': fprintf(OUTFILE, "\\f"); break;
-   case '\n': fprintf(OUTFILE, "\\n"); break;
-   case '\r': fprintf(OUTFILE, "\\r"); break;
-   case '\t': fprintf(OUTFILE, "\\t"); break;
-   case '\v': fprintf(OUTFILE, "\\v"); break;
-   default:	if (isprint(c))
-   			fprintf(OUTFILE, "%c",c);
-		else
-			fprintf(OUTFILE, "\\%03d",c);
+    int c = (int)(unsigned char)s[i];
+    switch (c) {
+      case '"' : fprintf(OUTFILE, "\\\""); break;
+      case '\\': fprintf(OUTFILE, "\\\\"); break;
+      case '\a': fprintf(OUTFILE, "\\a"); break;
+      case '\b': fprintf(OUTFILE, "\\b"); break;
+      case '\f': fprintf(OUTFILE, "\\f"); break;
+      case '\n': fprintf(OUTFILE, "\\n"); break;
+      case '\r': fprintf(OUTFILE, "\\r"); break;
+      case '\t': fprintf(OUTFILE, "\\t"); break;
+      case '\v': fprintf(OUTFILE, "\\v"); break;
+      default: {
+        if (isprint(c)) {
+          fprintf(OUTFILE, "%c",c);
+        } else {
+          fprintf(OUTFILE, "\\%03d",c);
+        }
+        break;
+      }
+    }
   }
- }
- fprintf(OUTFILE, "%c",'"');
+  fprintf(OUTFILE, "%c",'"');
 }
 
 static void PrintConstant(const Proto* f, int i)
 {
- const TValue* o=&f->k[i];
- switch (ttype(o))
- {
-  case LUA_TNIL:
-	fprintf(OUTFILE, "nil");
-	break;
-  case LUA_TBOOLEAN:
-	fprintf(OUTFILE, bvalue(o) ? "true" : "false");
-	break;
-  case LUA_TNUMFLT:
-	{
-	char buff[100];
-	sprintf(buff,LUA_NUMBER_FMT,fltvalue(o));
-	fprintf(OUTFILE, "%s",buff);
-	if (buff[strspn(buff,"-0123456789")]=='\0') fprintf(OUTFILE, ".0");
-	break;
-	}
-  case LUA_TNUMINT:
-	fprintf(OUTFILE, LUA_INTEGER_FMT,ivalue(o));
-	break;
-  case LUA_TSHRSTR: case LUA_TLNGSTR:
-	PrintString(tsvalue(o));
-	break;
-  default:				/* cannot happen */
-	fprintf(OUTFILE, "? type=%d",ttype(o));
-	break;
- }
+  const TValue* o = &f->k[i];
+  switch (ttype(o)) {
+    case LUA_TNIL:
+      fprintf(OUTFILE, "nil");
+      break;
+    case LUA_TBOOLEAN:
+      fprintf(OUTFILE, bvalue(o) ? "true" : "false");
+      break;
+    case LUA_TNUMFLT: {
+      char buff[100];
+      sprintf(buff,LUA_NUMBER_FMT,fltvalue(o));
+      fprintf(OUTFILE, "%s",buff);
+      if (buff[strspn(buff,"-0123456789")]=='\0') fprintf(OUTFILE, ".0");
+    } break;
+    case LUA_TNUMINT:
+      fprintf(OUTFILE, LUA_INTEGER_FMT,ivalue(o));
+      break;
+    case LUA_TSHRSTR: case LUA_TLNGSTR:
+      PrintString(tsvalue(o));
+      break;
+    default:				/* cannot happen */
+      fprintf(OUTFILE, "? type=%d",ttype(o));
+      break;
+  }
 }
 
 #define UPVALNAME(x) ((f->upvalues[x].name) ? getstr(f->upvalues[x].name) : "-")
@@ -362,55 +362,53 @@ static void PrintOpcodeComment(const Proto *f, int pc)
   //fprintf(OUTFILE, "\t%d\t",pc+1);
   if (line>0) fprintf(OUTFILE, "[%d]\t",line); else fprintf(OUTFILE, "[-]\t");
   fprintf(OUTFILE, "%-9s\t",luaP_opnames[o]);
-  switch (getOpMode(o))
-  {
+  switch (getOpMode(o)) {
     case iABC:
       fprintf(OUTFILE, "%d",a);
       if (getBMode(o)!=OpArgN) fprintf(OUTFILE, " %d",ISK(b) ? (MYK(INDEXK(b))) : b);
       if (getCMode(o)!=OpArgN) fprintf(OUTFILE, " %d",ISK(c) ? (MYK(INDEXK(c))) : c);
-    break;
+      break;
 
     case iABx:
       fprintf(OUTFILE, "%d",a);
       if (getBMode(o)==OpArgK) fprintf(OUTFILE, " %d",MYK(bx));
       if (getBMode(o)==OpArgU) fprintf(OUTFILE, " %d",bx);
-    break;
+      break;
 
     case iAsBx:
       fprintf(OUTFILE, "%d %d",a,sbx);
-    break;
+      break;
 
     case iAx:
       fprintf(OUTFILE, "%d",MYK(ax));
-    break;
+      break;
   }
 
-  switch (o)
-  {
+  switch (o) {
     case OP_LOADK:
       fprintf(OUTFILE, "\t; "); PrintConstant(f,bx);
-    break;
+      break;
 
     case OP_GETUPVAL:
     case OP_SETUPVAL:
       fprintf(OUTFILE, "\t; %s",UPVALNAME(b));
-    break;
+      break;
 
     case OP_GETTABUP:
       fprintf(OUTFILE, "\t; %s",UPVALNAME(b));
       if (ISK(c)) { fprintf(OUTFILE, " "); PrintConstant(f,INDEXK(c)); }
-    break;
+      break;
 
     case OP_SETTABUP:
       fprintf(OUTFILE, "\t; %s",UPVALNAME(a));
       if (ISK(b)) { fprintf(OUTFILE, " "); PrintConstant(f,INDEXK(b)); }
       if (ISK(c)) { fprintf(OUTFILE, " "); PrintConstant(f,INDEXK(c)); }
-    break;
+      break;
 
     case OP_GETTABLE:
     case OP_SELF:
       if (ISK(c)) { fprintf(OUTFILE, "\t; "); PrintConstant(f,INDEXK(c)); }
-    break;
+      break;
 
     case OP_SETTABLE:
     case OP_ADD:
@@ -427,36 +425,35 @@ static void PrintOpcodeComment(const Proto *f, int pc)
     case OP_EQ:
     case OP_LT:
     case OP_LE:
-      if (ISK(b) || ISK(c))
-      {
+      if (ISK(b) || ISK(c)) {
         fprintf(OUTFILE, "\t; ");
         if (ISK(b)) PrintConstant(f,INDEXK(b)); else fprintf(OUTFILE, "-");
         fprintf(OUTFILE, " ");
         if (ISK(c)) PrintConstant(f,INDEXK(c)); else fprintf(OUTFILE, "-");
       }
-    break;
+      break;
 
     case OP_JMP:
     case OP_FORLOOP:
     case OP_FORPREP:
     case OP_TFORLOOP:
       fprintf(OUTFILE, "\t; to %d",sbx+pc+1);
-    break;
+      break;
 
     case OP_CLOSURE:
       fprintf(OUTFILE, "\t; %p",VOID(f->p[bx]));
-    break;
+      break;
 
     case OP_SETLIST:
       if (c==0) fprintf(OUTFILE, "\t; %d",(int)code[++pc]); else fprintf(OUTFILE, "\t; %d",c);
-    break;
+      break;
 
     case OP_EXTRAARG:
       fprintf(OUTFILE, "\t; "); PrintConstant(f,ax);
-    break;
+      break;
 
     default:
-    break;
+      break;
   }
 
   fprintf(OUTFILE, "\n");
@@ -483,10 +480,8 @@ static void PrintCode(const Proto* f)
   fprintf(OUTFILE, "  UNUSED(k);\n");
   fprintf(OUTFILE, "  UNUSED(base);\n");
   fprintf(OUTFILE, "  \n");
- 
 
-  for (int pc=0; pc<nopcodes; pc++)
-  {
+  for (int pc=0; pc<nopcodes; pc++) {
     PrintOpcodeComment(f, pc);
 
     Instruction i=code[pc];
@@ -496,11 +491,11 @@ static void PrintCode(const Proto* f)
     fprintf(OUTFILE, "    Instruction i = 0x%08x;\n", i);
     fprintf(OUTFILE, "    StkId ra = RA(i);\n");
     switch (o) {
-      
+
       case OP_MOVE: {
         fprintf(OUTFILE, "    setobjs2s(L, ra, RB(i));\n");
       } break;
-      
+
       case OP_LOADK: {
         fprintf(OUTFILE, "    TValue *rb = k + GETARG_Bx(i);\n");
         fprintf(OUTFILE, "    setobj2s(L, ra, rb);\n");
@@ -514,14 +509,14 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "    rb = k + GETARG_Ax(%d);\n", next_i);
         fprintf(OUTFILE, "    setobj2s(L, ra, rb);\n");
       } break;
-      
+
       case OP_LOADBOOL: {
         fprintf(OUTFILE, "    setbvalue(ra, GETARG_B(i));\n");
         fprintf(OUTFILE, "    if (GETARG_C(i)) {\n");
         fprintf(OUTFILE, "      goto label_%d; /* skip next instruction (if C) */\n", pc+2);
         fprintf(OUTFILE, "    }\n");
       } break;
-      
+
       case OP_LOADNIL: {
         fprintf(OUTFILE, "    int b = GETARG_B(i);\n");
         fprintf(OUTFILE, "    do {\n");
@@ -539,7 +534,7 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "    TValue *rc = RKC(i);\n");
         fprintf(OUTFILE, "    gettableProtected(L, upval, rc, ra);\n");
       } break;
-      
+
       case OP_GETTABLE: {
         fprintf(OUTFILE, "    StkId rb = RB(i);\n");
         fprintf(OUTFILE, "    TValue *rc = RKC(i);\n");
@@ -559,7 +554,7 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "    setobj(L, uv->v, ra);\n");
         fprintf(OUTFILE, "    luaC_upvalbarrier(L, uv);\n");
       } break;
- 
+
       case OP_SETTABLE: {
         fprintf(OUTFILE, "    TValue *rb = RKB(i);\n");
         fprintf(OUTFILE, "    TValue *rc = RKC(i);\n");
@@ -615,7 +610,7 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "    }\n");
         fprintf(OUTFILE, "    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_SUB)); }\n");
       } break;
-      
+
       case OP_MUL: {
         fprintf(OUTFILE, "    TValue *rb = RKB(i);\n");
         fprintf(OUTFILE, "    TValue *rc = RKC(i);\n");
@@ -719,7 +714,7 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "    }\n");
         fprintf(OUTFILE, "    else { Protect(luaT_trybinTM(L, rb, rc, ra, TM_IDIV)); }\n");
       } break;
-      
+
       case OP_POW: {
         fprintf(OUTFILE, "    TValue *rb = RKB(i);\n");
         fprintf(OUTFILE, "    TValue *rc = RKC(i);\n");
@@ -786,7 +781,7 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "    if (a != 0) luaF_close(L, ci->u.l.base + a - 1);\n");
         fprintf(OUTFILE, "    goto label_%d;\n", target);
       } break;
-     
+
       case OP_EQ: {
         fprintf(OUTFILE, "    UNUSED(ra);\n");
         fprintf(OUTFILE, "    TValue *rb = RKB(i);\n");
@@ -799,7 +794,7 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "      goto label_%d;\n", pc+1);
         fprintf(OUTFILE, "    }\n");
       } break;
- 
+
       case OP_LT: {
         fprintf(OUTFILE, "    UNUSED(ra);\n");
         fprintf(OUTFILE, "    int cmp;\n");
@@ -821,7 +816,7 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "      goto label_%d;\n", pc+1);
         fprintf(OUTFILE, "    }\n");
       } break;
-     
+
       case OP_TEST: {
         fprintf(OUTFILE, "    if (GETARG_C(i) ? l_isfalse(ra) : !l_isfalse(ra)) {\n");
         fprintf(OUTFILE, "      goto label_%d;\n", pc+2);
@@ -876,7 +871,7 @@ static void PrintCode(const Proto* f)
         assert(GET_OPCODE(next) == OP_RETURN);
         assert(GETARG_B(next) == 0);
       } break;
- 
+
       case OP_RETURN: {
         fprintf(OUTFILE, "    int b = GETARG_B(i);\n");
         fprintf(OUTFILE, "    if (cl->p->sizep > 0) luaF_close(L, base);\n");
@@ -884,7 +879,7 @@ static void PrintCode(const Proto* f)
         fprintf(OUTFILE, "    luaD_poscall(L, ci, ra, ret);\n");
         fprintf(OUTFILE, "    return ret;\n");
       } break;
-     
+
       case OP_FORLOOP: {
         int target = pc + GETARG_sBx(i) + 1;
         fprintf(OUTFILE, "    if (ttisinteger(ra)) {  /* integer loop? */\n");
@@ -951,7 +946,7 @@ static void PrintCode(const Proto* f)
         assert(pc+1 < nopcodes);
         assert(GET_OPCODE(code[pc+1]) == OP_TFORLOOP);
       } break;
- 
+
       case OP_TFORLOOP: {
         int target = pc + GETARG_sBx(i) + 1;
         fprintf(OUTFILE, "    if (!ttisnil(ra + 1)) {  /* continue loop? */\n");
@@ -1035,10 +1030,10 @@ static void PrintCode(const Proto* f)
 
 static void PrintFunction(const Proto* f)
 {
- int n=f->sizep;
- PrintCode(f);
- NFUNCTIONS++;
- for (int i=0; i<n; i++) {
-     PrintFunction(f->p[i]);
- }
+  int n=f->sizep;
+  PrintCode(f);
+  NFUNCTIONS++;
+  for (int i=0; i<n; i++) {
+    PrintFunction(f->p[i]);
+  }
 }
