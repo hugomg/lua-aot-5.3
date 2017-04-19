@@ -46,11 +46,5 @@ local function addqueen (a, n, N)
   end
 end
 
-if magic then
-    magic(1, isplaceok)
-    magic(2, printsolution)
-    magic(3, addqueen)
-end
-
 -- run the program
 addqueen({}, 1, N)

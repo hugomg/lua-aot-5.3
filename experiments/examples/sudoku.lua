@@ -121,12 +121,6 @@ local games = [[
 .....1.2.3...4.5.....6....7..2.....1.8..9..3.4.....8..5....2....9..3.4....67.....
 ]]
 
-if magic then
-    magic(1, sd_genmat)
-    magic(2, sd_update)
-    magic(3, sd_solve)
-end
-
 local R, C = sd_genmat()
 for l in games:gmatch("(.-)\n") do
     if #l >= 81 then

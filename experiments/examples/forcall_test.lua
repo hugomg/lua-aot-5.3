@@ -5,8 +5,4 @@ local function dump(t)
     end
 end
 
-if magic then
-    magic(1, dump)
-end
-
 dump({a=1, b=2, c=3})

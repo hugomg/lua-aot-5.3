@@ -287,31 +287,6 @@ memory"begin"
 	end
 end
 
-if magic then
-    magic(1, output)
-    magic(2, imul)
-    magic(3, isqr)
-    magic(4, f)
-    magic(5, outside)
-    magic(6, inside)
-    magic(7, newcell)
-    magic(8, addedge)
-    magic(9, refine)
-    magic(10, clip)
-    magic(11, map)
-    magic(12, update)
-    magic(13, color)
-    magic(14, prewhite)
-    magic(15, recolor)
-    magic(16, area)
-    magic(17, colorup)
-    magic(18, save)
-    magic(19, show)
-    magic(20, memory)
-    magic(21, do_)
-    magic(22, julia)
-end
-
 --julia(14,0.25,0.35)
 --julia(14, -.12, .74 )
 --julia(14,0,0)

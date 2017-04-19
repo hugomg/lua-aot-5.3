@@ -25,12 +25,5 @@ obj = {
     end
 }
 
-if magic then
-    magic(1, f1)
-    magic(2, f2)
-    magic(3, f3)
-    magic(5, obj.foo)
-end
-
 print(f1())
 

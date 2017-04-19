@@ -4,8 +4,4 @@ local function foo(...)
     return a + b + c
 end
 
-if magic then
-    magic(1, foo)
-end
-
 print(foo(1,2,3,4))

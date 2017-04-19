@@ -41,10 +41,6 @@ function heapsort(n, ra)
     end
 end
 
-if magic then
-  magic(1, heapsort)
-end
-
 local Num = tonumber((arg and arg[1])) or 5
 for i=1,Num do
   local N = tonumber((arg and arg[2])) or 100000

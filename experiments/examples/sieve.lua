@@ -10,12 +10,12 @@
 
 local count = 0
 
-function main(num, lim)
+local function main(num, lim)
     local flags = {}
     for num=num,1,-1 do
         count = 0
         for i=1,lim do
-          flags[i] = 1
+              flags[i] = 1
         end
         for i=2,lim do
             if flags[i] == 1 then
@@ -27,11 +27,6 @@ function main(num, lim)
             end
         end
     end
-end
-
-
-if magic then
-    magic(1, main)
 end
 
 --NUM = tonumber((arg and arg[1])) or 100

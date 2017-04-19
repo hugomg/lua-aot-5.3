@@ -3,15 +3,8 @@
 -- Author: Gabriel de Quadros Ligneul
 -- Copyright Notice for LLL: see lllcore.h
 
-local function main()
-    local a = 0
-    for i = 1, 1e8 do
-        a = a + i
-    end
+local a = 0
+for i = 1, 1e8 do
+    a = a + i
 end
-
-if magic then
-    magic(1, main)
-end
-
-main()
+print(a)

@@ -8,10 +8,6 @@ local function fib(n)
     end
 end
 
-if magic then
-    magic(1, fib)
-end
-
 for i=0,20 do
     print(i, fib(i))
 end

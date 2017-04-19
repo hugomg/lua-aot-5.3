@@ -7,9 +7,4 @@ local function fac(n)
   return r
 end
 
-if magic then
-  magic(1, fac)
-end
-
-local r = fac(5)
-print(r)
+print(fac(5))
