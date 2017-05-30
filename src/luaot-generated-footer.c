@@ -14,9 +14,24 @@ static void bind_magic(Proto *p, int *next_id)
 int ZZ_LUAOPEN_NAME (lua_State *L) {
     
     int ok = luaL_loadstring(L, ZZ_ORIGINAL_SOURCE_CODE);
-    if (ok != LUA_OK) {
-        fprintf(stderr, "could not load file\n");
+    switch (ok) {
+      case LUA_OK:
+        /* No errors */
+        break;
+      case LUA_ERRSYNTAX:
+        fprintf(stderr, "syntax error in bundled source code.\n");
         exit(1);
+        break;
+      case LUA_ERRMEM:
+        fprintf(stderr, "memory allocation (out-of-memory) error in bundled source code.\n");
+        exit(1);
+        break;
+      case LUA_ERRGCMM:
+        fprintf(stderr, "error while running a __gc metamethod.\n");
+        exit(1);
+        break;
+      default:
+        assert(0);
     }
 
     LClosure *cl = (void *) lua_topointer(L, -1);

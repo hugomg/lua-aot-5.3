@@ -226,10 +226,15 @@ static int pmain(lua_State* L)
     FILE *infile = fopen(input_filename, "r");
     if (!infile) fatal("could not open input file");
 
-    fprintf(OUTFILE, "const char ZZ_ORIGINAL_SOURCE_CODE[] = {\n");
-    {int c; while (c = fgetc(infile), c != EOF) {
-                                                  fprintf(OUTFILE, "%d, ", c);
-                                                }}
+    fprintf(OUTFILE, "static const char ZZ_ORIGINAL_SOURCE_CODE[] = {\n");
+    {int c, i=0; while (c = fgetc(infile), c != EOF) {
+      fprintf(OUTFILE, "%d, ", c);
+      if (++i >= 16) {
+        i = 0;
+        fprintf(OUTFILE, "\n");
+      }
+    }}
+    fprintf(OUTFILE, "0,\n");
     fprintf(OUTFILE, "};\n");
     fprintf(OUTFILE, "\n");
 
