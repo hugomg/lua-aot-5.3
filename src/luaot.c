@@ -481,9 +481,9 @@ static void PrintCode(const Proto* f)
   fprintf(OUTFILE, "  StkId base = ci->u.l.base;\n");
   fprintf(OUTFILE, "  \n");
   fprintf(OUTFILE, "  // Avoid warnings if the function has few opcodes:\n");
-  fprintf(OUTFILE, "  UNUSED(ci);\n");
-  fprintf(OUTFILE, "  UNUSED(k);\n");
-  fprintf(OUTFILE, "  UNUSED(base);\n");
+  fprintf(OUTFILE, "  (void) ci;\n");
+  fprintf(OUTFILE, "  (void) k;\n");
+  fprintf(OUTFILE, "  (void) base;\n");
   fprintf(OUTFILE, "  \n");
 
   for (int pc=0; pc<nopcodes; pc++) {
@@ -547,7 +547,7 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_SETTABUP: {
-        fprintf(OUTFILE, "    UNUSED(ra);\n");
+        fprintf(OUTFILE, "    (void) ra;\n");
         fprintf(OUTFILE, "    TValue *upval = cl->upvals[GETARG_A(i)]->v;\n");
         fprintf(OUTFILE, "    TValue *rb = RKB(i);\n");
         fprintf(OUTFILE, "    TValue *rc = RKC(i);\n");
@@ -781,14 +781,14 @@ static void PrintCode(const Proto* f)
 
       case OP_JMP: {
         int target = pc + GETARG_sBx(i) + 1;
-        fprintf(OUTFILE, "    UNUSED(ra);\n");
+        fprintf(OUTFILE, "    (void) ra;\n");
         fprintf(OUTFILE, "    int a = GETARG_A(i);\n");
         fprintf(OUTFILE, "    if (a != 0) luaF_close(L, ci->u.l.base + a - 1);\n");
         fprintf(OUTFILE, "    goto label_%d;\n", target);
       } break;
 
       case OP_EQ: {
-        fprintf(OUTFILE, "    UNUSED(ra);\n");
+        fprintf(OUTFILE, "    (void) ra;\n");
         fprintf(OUTFILE, "    TValue *rb = RKB(i);\n");
         fprintf(OUTFILE, "    TValue *rc = RKC(i);\n");
         fprintf(OUTFILE, "    int cmp;\n");
@@ -801,7 +801,7 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_LT: {
-        fprintf(OUTFILE, "    UNUSED(ra);\n");
+        fprintf(OUTFILE, "    (void) ra;\n");
         fprintf(OUTFILE, "    int cmp;\n");
         fprintf(OUTFILE, "    Protect(cmp = luaV_lessthan(L, RKB(i), RKC(i)));\n");
         fprintf(OUTFILE, "    if (cmp != GETARG_A(i)) {\n");
@@ -812,7 +812,7 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_LE: {
-        fprintf(OUTFILE, "    UNUSED(ra);\n");
+        fprintf(OUTFILE, "    (void) ra;\n");
         fprintf(OUTFILE, "    int cmp;\n");
         fprintf(OUTFILE, "    Protect(cmp = luaV_lessequal(L, RKB(i), RKC(i)));\n");
         fprintf(OUTFILE, "    if (cmp != GETARG_A(i)) {\n");
@@ -1014,7 +1014,7 @@ static void PrintCode(const Proto* f)
       } break;
 
       case OP_EXTRAARG: {
-        fprintf(OUTFILE, "    UNUSED(ra);\n");
+        fprintf(OUTFILE, "    (void) ra;\n");
         fprintf(OUTFILE, "    // NO OP\n");
       } break;
 
