@@ -5,6 +5,8 @@ src/lua
 src/luac
 src/luaot
 
-experiments/generated/*
+experiments/examples/*.S
+experiments/examples/*.c
+experiments/examples/*.so
 experiments/Makefile
 

@@ -7,7 +7,6 @@
 PLAT=linux
 
 CC= gcc -std=gnu99
-#CC= clang -std=gnu99
 CFLAGS= -O2 -Wall -Wextra -DLUA_COMPAT_5_2 -g $(SYSCFLAGS) $(MYCFLAGS)
 LDFLAGS= $(SYSLDFLAGS) $(MYLDFLAGS)
 LIBS= -lm $(SYSLIBS) $(MYLIBS)
