@@ -7,7 +7,7 @@
 PLAT=linux
 
 CC= gcc -std=gnu99
-CFLAGS= -O2 -Wall -Wextra -fPIC -save-temps -DLUA_COMPAT_5_2 -g $(SYSCFLAGS) $(MYCFLAGS)
+CFLAGS= -O2 -Wall -Wextra -fPIC -DLUA_COMPAT_5_2 -g $(SYSCFLAGS) $(MYCFLAGS)
 LDFLAGS= $(SYSLDFLAGS) $(MYLDFLAGS)
 LIBS= -lm $(SYSLIBS) $(MYLIBS)
 

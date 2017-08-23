@@ -35,6 +35,7 @@ static const char* progname;        /* actual program name from argv[0] */
 static const char* input_filename;  /* path to input Lua module */
 static const char* output_filename; /* path to output C library module */
 static const char* module_name;     /* name of generated module (for luaopen_XXX) */
+static int bytecode_literals;       /* Include the bytecodes as literals in the C code */
 
 // Global variables
 static int NFUNCTIONS = 0;  /* ID of magic functions */ 
@@ -89,6 +90,7 @@ static void doargs(int argc, char* argv[])
   input_filename = NULL;
   output_filename = NULL;
   module_name = NULL;
+  bytecode_literals = 1;
 
   if (argv[0] !=NULL && argv[0][0] != '\0') {
     progname=argv[0];
@@ -112,6 +114,8 @@ static void doargs(int argc, char* argv[])
           usage();
         }
         output_filename = argv[i];
+      } else if (0 == strcmp(arg, "--no-constant-propagation")) {
+        bytecode_literals = 0;
       } else {
         fprintf(stderr,"%s: Unrecognized option %s\n", progname, arg);
         usage();
@@ -503,9 +507,14 @@ static void PrintCode(const Proto* f)
     PP_writeln(&pp, "label_%d: {", pc); PP_indent(&pp);
 
     // vmfetch
-    //PP_writeln(&pp, "Instruction i = 0x%08x;", i);
-    PP_writeln(&pp, "Instruction i = *(ci->u.l.savedpc++);");
-   // PP_writeln(&pp, "assert(i ==  0x%08x);", i); //(!)
+    if (bytecode_literals) {
+      PP_writeln(&pp, "Instruction i = 0x%08x;", i);
+      // PP_writeln(&pp, "assert(i == *ci->u.l.savedpc);");
+      PP_writeln(&pp, "ci->u.l.savedpc++;");
+    } else {
+      PP_writeln(&pp, "Instruction i = *(ci->u.l.savedpc++);");
+      // PP_writeln(&pp, "assert(i ==  0x%08x);", i);
+    }
     PP_writeln(&pp, "if (L->hookmask & (LUA_MASKLINE | LUA_MASKCOUNT))");
     PP_writeln(&pp, "  Protect(luaG_traceexec(L));");
     PP_writeln(&pp, "StkId ra = RA(i); /* WARNING: any stack reallocation invalidates 'ra' */");
