@@ -43,7 +43,7 @@ LUAC_T=	luac
 LUAC_O=	luac.o
 
 LUAOT_T= luaot
-LUAOT_O= luaot.o
+LUAOT_O= luaot.o pretty_printer.o
 
 ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O) $(LUAOT_O)
 ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(LUAOT_T)
@@ -202,5 +202,7 @@ lzio.o: lzio.c lprefix.h lua.h luaconf.h llimits.h lmem.h lstate.h \
 
 luaot.o: luaot.c lprefix.h lua.h luaconf.h lauxlib.h lobject.h llimits.h \
  lstate.h ltm.h lzio.h lmem.h lundump.h ldebug.h lopcodes.h
+
+pretty_printer.o: pretty_printer.c pretty_printer.h
 
 # (end of Makefile)
