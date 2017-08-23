@@ -4,7 +4,6 @@
 -- Copyright Notice for LLL: see lllcore.h
 
 local a = 0
-for i = 1, 5e8 do
-    a = a + i
+for i = 1, 1e8 do
 end
 print(a)
