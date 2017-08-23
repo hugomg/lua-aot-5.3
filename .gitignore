@@ -1,12 +1,14 @@
-*.o
 *.a
+*.i
+*.o
+*.s
+*.S
+*.so
 
 src/lua
 src/luac
 src/luaot
 
-experiments/examples/*.S
 experiments/examples/*.c
-experiments/examples/*.so
 experiments/Makefile
 

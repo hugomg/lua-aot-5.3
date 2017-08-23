@@ -7,7 +7,7 @@
 PLAT=linux
 
 CC= gcc -std=gnu99
-CFLAGS= -O2 -Wall -Wextra -DLUA_COMPAT_5_2 -g $(SYSCFLAGS) $(MYCFLAGS)
+CFLAGS= -O2 -Wall -Wextra -fPIC -save-temps -DLUA_COMPAT_5_2 -g $(SYSCFLAGS) $(MYCFLAGS)
 LDFLAGS= $(SYSLDFLAGS) $(MYLDFLAGS)
 LIBS= -lm $(SYSLIBS) $(MYLIBS)
 
@@ -72,7 +72,7 @@ $(LUAOT_T): $(LUAOT_O) $(LUA_A)
 	$(CC) -o $@ $(LDFLAGS) $(LUAOT_O) $(LUA_A) $(LIBS)
 
 clean:
-	$(RM) $(ALL_T) $(ALL_O)
+	$(RM) $(ALL_T) $(ALL_O) ./*.s ./*.i
 
 depend:
 	@$(CC) $(CFLAGS) -MM l*.c
