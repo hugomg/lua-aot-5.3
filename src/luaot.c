@@ -165,14 +165,7 @@ static void doargs(int argc, char* argv[])
     fatal("output file must have a .c extension");
   }
 
-  if (0 != strcmp(input_basename_noext, output_basename_noext)) {
-    fatal("the names of the input and output files must match");
-    // We do this because the C module needs to know its Lua module name
-    // because of the luaopen_ interface and it is easier for everyone
-    // if I force the ".lua", ".c" and ".so" filenames to match.
-  }
-
-  module_name = strdup(input_basename_noext);
+  module_name = strdup(output_basename_noext);
 
   for (const char *s = module_name; *s != '\0'; s++) {
     if (! (isalnum(*s) || *s == '_')) {
