@@ -23,6 +23,9 @@ This is a modified version of the Lua 5.3.4 interpreter. Here are the changes I 
 +   LUAI_FUNC LClosure *luaV_getcached (Proto *p, UpVal **encup, StkId base);
 +   LUAI_FUNC void luaV_pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base, StkId ra);
 
+  // In lapi.c
+    static TValue *index2addr --> LUA_FUNC TValue *index2addr
+
 
 2) Add a "magic implementation" field to the Proto data structure
 =================================================================
